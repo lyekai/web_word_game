@@ -1,13 +1,16 @@
 body, html {
     margin: 0;
     padding: 0;
+    width: 100%;
     height: 100%;
+    height: 100dvh; /* 防止虛擬鍵盤擠壓 */
     overflow: hidden;
     font-family: "Noto Sans TC", "sans-serif"; 
     color: white;
     text-align: center;
     align-items: center;
     box-sizing: border-box;
+    user-select: none; /* 防止遊戲中選取文字錯位 */
 }
 .bg-layer {
     position: fixed;
@@ -35,6 +38,7 @@ body, html {
     font-size: 1.1em;
     cursor: pointer;
     transition: background 0.3s ease;
+    z-index: 10;
 }
 #back-btn:hover {
     background: rgba(255, 255, 255, 0.5);
@@ -649,150 +653,39 @@ a {
 }
 /* ================= 模態視窗樣式 End ================= */
 
+/* ================= 直向全螢幕旋轉提示遮罩 ================= */
+#portrait-orientation-mask {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    background: #121212;
+    color: #ffffff;
+    z-index: 99999;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
 
-@media screen and (max-width: 768px) {
-    .game-box {
-        width: 90%;
-        height: 30%;
-        transform: translate(-50%, -100%);
-    }
-     #vague-image {
-        height: 70%;  /* 可自行調整 */
-    }
-    .sentence {
-        width: 90%;
-        height: 14%;
-        transform: translate(-39%, 120%);
-        font-size: 0.8em;
-        padding: 0 20px;
-        z-index: 1000;
-    }
-    .sentence p {
-        font-size: 3.5vw;
-        margin: 8px 0;
-    }
-    .sentence-input {
-        height: 35%; 
-        width: 80%;
-        font-size: 15px;
-        transform: translateY(-15%);
+.rotate-phone-icon {
+    font-size: 4rem;
+    animation: rotate-animation 2s infinite ease-in-out;
+    margin-bottom: 20px;
+}
 
-    }
-    .answer-area {
-        width: 90%;
-        height: 35%;
-        transform: translate(-50%, 50%);
-    }
-    .word-card {
-        height: 40%;
-        transform: translateY(-125%);
-    }
-    .feed-back {
-        height: 45%;
-        transform: translateY(-20%);
-    }
-    .cards {
-        width: 60%;
-        font-size: 16px;
-    }
-    .confirm {
-        width: 25%;
-    }
-    .card {
-        width: 70%;
-        padding: 3px 0;
-        margin: 4px auto;
-        background: rgba(255, 255, 255, 0.5);
-        border: 1px solid white;
-        color: black;
-        border-radius: 8px;
-        text-align: center;
-        font-size: 1.2em;
-        cursor: pointer;
-        transition: 0.2s;
-    }
-    .confirm-btn {
-        right: 10px;
-        margin-top: 2px;
-        padding: 4px 8px;
-        border-radius: 8px;
-        font-size: 0.8em;
-        transform: translateY(-20%);
-    }
+@keyframes rotate-animation {
+    0% { transform: rotate(0deg); }
+    50% { transform: rotate(-90deg); }
+    100% { transform: rotate(0deg); }
+}
 
-    .submit-btn {
-        right: 10px;
-        bottom: 10px;
-        padding: 5px 9px;
-        font-size: 1em;
-    }
-
-    #level-indicator {
-        gap: 10px;
-        font-size: 0.5em;
-        margin-top: 90px;
-    }
-    .level-circle {
-        width: 16px;
-        height: 16px;
-    }
-    .star {
-        font-size: 1.5rem;
-    }
-    #stars-container {
-        top: 5vh;
-        right: 3vw;
-        gap: 10px;
-    }
-    #left-side p {
-        font-size: 2vh;
-    }
-    #right-side {
-        gap: 20px;
-    }
-
-    #tip-boxes {
-        gap: 5px;
-    }
-    #answer-boxes {
-        gap: 5px;
-    }
-
-    .tip-box {
-        height: 25%;
-        min-height: 20px;
-        font-size: 0.7em;
-    }
-    .answer-box {
-        height: 25%;
-        min-height: 20px;
-        font-size: 0.7em;
-    }
-    #feedback-container {
-        margin-top: 20px;
-        font-size: 0.8rem;
-        color: white;
-        /* border: 2px solid white; */
-    }
-    #generate-image-btn {
-        bottom: 10px; 
-        right: 80px;
-        padding: 6px 12px;
-        border-radius: 10px;
-    }
-    .modal-body h3 {
-        font-size: 10px;
-    }
-    .modal-content {
-        background-color: #fff;
-        padding: 20px;
-        border-radius: 15px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-        /* 設置寬高並置中 */
-        width: 80vw; /* 寬度 80% */
-        height: 45vh; /* 高度 45% */
-    }
-    .modal-summary-stars {
-        font-size: 1.5rem; 
+/* 當螢幕為直向模式 (Portrait) 時，強制顯示旋轉提示遮罩 */
+@media screen and (orientation: portrait) {
+    #portrait-orientation-mask {
+        display: flex !important;
     }
 }
