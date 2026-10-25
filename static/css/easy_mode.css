@@ -826,4 +826,7 @@ a {
     .modal-summary-stars {
         font-size: 1.5rem; 
     }
+    #fullscreen-btn {
+        display: none;
+    }
 }
