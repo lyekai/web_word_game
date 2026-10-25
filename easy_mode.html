@@ -119,6 +119,8 @@
         </div>
     </div>
 
+    <button id="fullscreen-btn" onclick="toggleFullScreen()" style="position: fixed; top: 20px; left: 110px; padding: 10px 15px; background: rgba(255, 255, 255, 0.3); border: 2px solid white; border-radius: 8px; color: white; font-size: 1.1em; cursor: pointer; z-index: 10;">🔍 全螢幕</button>
+
     <script>
         let currentLevel = 1; 
         let levelDataCache = []; 
@@ -629,6 +631,35 @@
                 });
             }
         });
+
+        // 切換全螢幕函式
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                // 進入全螢幕並嘗試鎖定為橫屏 (支援的行動裝置會自動轉橫並隱藏網址列)
+                document.documentElement.requestFullscreen().then(() => {
+                    if (screen.orientation && screen.orientation.lock) {
+                        screen.orientation.lock('landscape').catch(err => {
+                            console.log("螢幕鎖定橫向失敗或不支援: ", err);
+                        });
+                    }
+                }).catch(err => {
+                    console.error(`無法啟用全螢幕模式: ${err.message} (${err.name})`);
+                });
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+
+        // 選擇性：當使用者第一次點擊畫面時，自動幫他進入全螢幕（增加遊戲體驗）
+        window.addEventListener('click', function initFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    // 瀏覽器通常要求必須由使用者互動（點擊）觸發，這裡捕捉例外避免報錯
+                });
+            }
+        }, { once: true }); // 只觸發一次
     </script>
 </body>
 </html>
