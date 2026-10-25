@@ -2,12 +2,14 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>簡單模式：單字解謎</title>
     <link rel="stylesheet" href="static/css/easy_mode.css">
 </head>
 
 <body>
+
     <audio id="easy-bgm" src="static/audio/music_easy.mp3" loop></audio>
 
     <div class="bg-layer"></div>
@@ -50,39 +52,41 @@
         </div>
     </div>
 
-    <div id="game-box" class="game-box">
-        <div id="left-side">
-            <img id="vague-image" src="" alt="vague-image">
-            <p>猜猜看圖片中有什麼？</p>
-        </div>
-        <div id="right-side">
-            <div id="tip-boxes">
-                <div class="tip-box" id="tip1"></div>
-                <div class="tip-box" id="tip2"></div>
-                <div class="tip-box" id="tip3"></div>
+    <div class="main-game-layout">
+        <div id="game-box" class="game-box">
+            <div id="left-side">
+                <img id="vague-image" src="" alt="vague-image">
+                <p>猜猜看圖片中有什麼？</p>
             </div>
-            <div id="answer-boxes">
-                <div class="answer-box" id="answer1"></div>
-                <div class="answer-box" id="answer2"></div>
-                <div class="answer-box" id="answer3"></div>
+            <div id="right-side">
+                <div id="tip-boxes">
+                    <div class="tip-box" id="tip1"></div>
+                    <div class="tip-box" id="tip2"></div>
+                    <div class="tip-box" id="tip3"></div>
+                </div>
+                <div id="answer-boxes">
+                    <div class="answer-box" id="answer1"></div>
+                    <div class="answer-box" id="answer2"></div>
+                    <div class="answer-box" id="answer3"></div>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div class="sentence" id="sentence">
-        <p>請用選擇的三個單字造一個句子</p>
-        <input type="text" id="sentence-input" placeholder="在這裡輸入您的英文句子..." class="sentence-input">
-        <button class="confirm-btn hidden">確認</button>
-    </div>
+        <div class="sentence" id="sentence">
+            <p>請用選擇的三個單字造一個句子</p>
+            <input type="text" id="sentence-input" placeholder="在這裡輸入您的英文句子..." class="sentence-input">
+            <button class="confirm-btn hidden">確認</button>
+        </div>
 
-    <div id="answer-area" class="answer-area">
-        <div class="word-card">
-            <div class="cards"></div>
-            <button class="submit-btn hidden">檢查答案</button>
-        </div> 
-        <div class="feed-back">
-            <div id="feedback-container"></div>
-        </div> 
+        <div id="answer-area" class="answer-area">
+            <div class="word-card">
+                <div class="cards"></div>
+                <button class="submit-btn hidden">檢查答案</button>
+            </div> 
+            <div class="feed-back">
+                <div id="feedback-container"></div>
+            </div> 
+        </div>
     </div>
 
     <div id="image-modal" class="modal-backdrop">
@@ -613,6 +617,18 @@
                 localStorage.setItem('gameProgress', JSON.stringify(progressData));
             }
         }
+        // 當手機鍵盤打開時，透過 JavaScript 滾動與鎖定高度，避免佈局被壓縮
+        window.addEventListener("DOMContentLoaded", () => {
+            const inputField = document.getElementById("sentence-input");
+            if (inputField) {
+                inputField.addEventListener("focus", () => {
+                    // 輸入時自動將畫面平滑拉至輸入區域，避免被虛擬鍵盤推擠變形
+                    setTimeout(() => {
+                        inputField.scrollIntoView({ behavior: "smooth", block: "center" });
+                    }, 300);
+                });
+            }
+        });
     </script>
 </body>
 </html>
