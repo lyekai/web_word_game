@@ -171,37 +171,73 @@
             typing();
         }
 
-        // 前端 AI 繪圖產生器 (經由 Vercel 後端安全帶入付費版 Key)
+        // AI 生圖：向同網域的 Vercel API 要求圖片資料，API Key 不會暴露在前端。
         async function generateFrontendImage(promptText) {
-            const fallbackImage = "static/image/default_ai.png";
+            const response = await fetch("/api/generate-image", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ promptText })
+            });
+
+            if (!response.ok) {
+                let errorMessage = `圖片生成失敗（HTTP ${response.status}）`;
+                try {
+                    const errorData = await response.json();
+                    errorMessage = errorData.details || errorData.error || errorMessage;
+                    console.error("Pollinations 生圖 API 錯誤：", errorData);
+                } catch (_) {
+                    // 回應不是 JSON 時保留 HTTP 錯誤訊息。
+                }
+                throw new Error(errorMessage);
+            }
+
+            const contentType = response.headers.get("content-type") || "";
+            if (!contentType.toLowerCase().startsWith("image/")) {
+                throw new Error(`後端回應不是圖片（${contentType || "未知 Content-Type"}）`);
+            }
+
+            const imageBlob = await response.blob();
+            if (!imageBlob.size) {
+                throw new Error("API 回傳的圖片內容是空的");
+            }
+
+            // objectUrl 用於當前畫面顯示；portfolioImage 用於作品集儲存。
+            const objectUrl = URL.createObjectURL(imageBlob);
+            let portfolioImage = objectUrl;
 
             try {
-                const response = await fetch("/api/generate-image", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ promptText })
-                });
+                // 壓縮成 512x512 JPEG data URL，避免把暫時性 blob URL 存進 localStorage。
+                // 若轉檔失敗，仍可顯示圖片，但作品集會暫存 object URL。
+                portfolioImage = await new Promise((resolve, reject) => {
+                    const image = new Image();
+                    image.onload = () => {
+                        try {
+                            const canvas = document.createElement("canvas");
+                            canvas.width = 512;
+                            canvas.height = 512;
+                            const context = canvas.getContext("2d");
+                            context.fillStyle = "#ffffff";
+                            context.fillRect(0, 0, canvas.width, canvas.height);
 
-                if (!response.ok) throw new Error("繪圖 API 回傳失敗");
-
-                const data = await response.json();
-                const imageUrl = data.imageUrl;
-
-                return new Promise((resolve) => {
-                    const img = new Image();
-                    img.src = imageUrl;
-                    img.onload = () => resolve(imageUrl);
-                    img.onerror = () => {
-                        console.warn("圖片載入失敗，切換至備用圖片");
-                        const levelData = levelDataCache.find(item => Number(item.level) === Number(currentLevel));
-                        resolve(levelData ? levelData.image_origin : fallbackImage);
+                            const scale = Math.min(512 / image.naturalWidth, 512 / image.naturalHeight);
+                            const width = Math.round(image.naturalWidth * scale);
+                            const height = Math.round(image.naturalHeight * scale);
+                            const x = Math.round((512 - width) / 2);
+                            const y = Math.round((512 - height) / 2);
+                            context.drawImage(image, x, y, width, height);
+                            resolve(canvas.toDataURL("image/jpeg", 0.78));
+                        } catch (error) {
+                            reject(error);
+                        }
                     };
+                    image.onerror = () => reject(new Error("無法讀取生成的圖片"));
+                    image.src = objectUrl;
                 });
-            } catch (err) {
-                console.warn("呼叫繪圖後端失敗，切換至備用圖片:", err);
-                const levelData = levelDataCache.find(item => Number(item.level) === Number(currentLevel));
-                return levelData ? levelData.image_origin : fallbackImage;
+            } catch (error) {
+                console.warn("作品集圖片壓縮失敗，暫用當前圖片網址：", error);
             }
+
+            return { objectUrl, portfolioImage };
         }
 
         // Gemini API 前端呼叫邏輯
@@ -285,14 +321,14 @@
             handleFinalSave();
 
             try {
-                const generatedUrl = await generateFrontendImage(userSentence);
-                aiImg.src = generatedUrl;
+                const generatedImage = await generateFrontendImage(userSentence);
+                aiImg.src = generatedImage.objectUrl;
                 loading.classList.add("hidden");
                 aiImg.classList.remove("hidden");
-                footer.style.display = "flex"; 
-                
+                footer.style.display = "flex";
+
                 saveToPortfolio({
-                    image: generatedUrl, 
+                    image: generatedImage.portfolioImage,
                     mode: '簡單模式',
                     level: currentLevel,
                     sentence: userSentence,
@@ -301,7 +337,9 @@
                     time: new Date().toLocaleString('zh-TW', { hour12: false })
                 });
             } catch (e) {
-                loading.textContent = "生圖功能暫時休息，不影響過關，請點擊下一關。";
+                console.error("AI 生圖失敗：", e);
+                loading.textContent = `圖片生成失敗：${e.message || "請稍後再試"}。過關紀錄不受影響。`;
+                aiImg.classList.add("hidden");
                 footer.style.display = "flex";
             }
         }
