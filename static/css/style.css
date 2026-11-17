@@ -198,11 +198,11 @@ h1 {
 #mode-menu {
     display: flex;
     justify-content: center;
-    gap: 120px;
+    gap: 100px;
 }
 .mode-box {
-    width: 250px;
-    height: 250px;
+    width: 200px;
+    height: 200px;
     border: 2px solid white;
     background: rgba(255, 255, 255, 0.15);
     border-radius: 10px;
@@ -215,8 +215,8 @@ h1 {
     transform: scale(1);
 }
 .mode-box img {
-    width: 180px;
-    height: 180px;
+    width: 120px;
+    height: 120px;
     border-radius: 10px;
 }
 .mode-box p {
@@ -245,14 +245,14 @@ a {
 /* 桌面版佈局：150px 寬，每列 6 個 */
 .level-grid {
     display: grid;
-    grid-template-columns: repeat(6, 150px); 
+    grid-template-columns: repeat(6, 120px); 
     gap: 20px;
     justify-content: center;
     width: auto;
 }
 .level-btn {
-    width: 150px;
-    height: 150px;
+    width: 120px;
+    height: 120px;
     background: rgba(255, 255, 255, 0.15);
     border: 3px solid rgba(255, 255, 255, 0.6);
     border-radius: 20px;
